@@ -12,6 +12,7 @@ from receiver_module.message_handler import message_handler
 from utils.maximum_frequency import maximum_frequency
 from adaptive_algorithms.costas_loop import costas_loop_QAM
 from adaptive_algorithms.clock_recovery import clock_recovery_OP_max
+from utils.caesar_cipher import caesar_decrypt
 
 # System Parameters
 tx_LO_frequency = int(900e6)
@@ -125,8 +126,10 @@ received_message = frame_generator_RX(quantized_symbols=quantized_symbols,
                                       modulation_type='QAM4_2')
 print(f'Received Message is:\n{received_message}')
 try:
-    msg_output = message_handler(received_message, True)
-    print(f'Message Output: \n {msg_output}')
+    encrypted_msg_output = message_handler(received_message, True)
+    msg_output = caesar_decrypt(encrypted_msg_output)
+    print(f'Encrypted Message Output: \n {encrypted_msg_output}')
+    print(f'Decrypted Message Output: \n {msg_output}')
 except:
     print("From except block")
     plt.show()

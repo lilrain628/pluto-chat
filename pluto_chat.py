@@ -29,6 +29,10 @@ def input_and_transmit(input_queue, exit_event, mySDR):
             transmit_message(msg, mySDR)
         except ValueError:
             print("Invalid input. Please enter a valid number.")
+        except OSError as error:
+            print(f"SDR transmit error: {error}")
+            exit_event.set()
+            break
         except queue.Empty:  # Use the queue module for the exception
             pass
 
@@ -36,7 +40,12 @@ def input_and_transmit(input_queue, exit_event, mySDR):
 # Function to print a message every second
 def print_message(exit_event, mySDR):
     while not exit_event.is_set():
-        receivedMessage = operation_RX(mySDR, False)
+        try:
+            receivedMessage = operation_RX(mySDR, False)
+        except OSError as error:
+            print(f"SDR receive error: {error}")
+            exit_event.set()
+            break
         if receivedMessage == None:
             pass
         else:
@@ -47,7 +56,7 @@ def print_message(exit_event, mySDR):
 # Function to add a radio
 def add_radio_menu():
     print("Adding a radio ")
-    iIpAddress = input("Enter the ip address: ")
+    iIpAddress = input("Enter the SDR IP or URI: ")
     iName = input("Enter your username:")
     mySDR = MyRadio(iIpAddress, iName)
     return mySDR
@@ -146,6 +155,10 @@ def chat(mySDR):
 
     transmission_thread.join()
     receiver_thread.join()
+
+    if mySDR is not None:
+        mySDR.kill_transmission()
+        mySDR.rx_destroy_buffer()
 
 
 # Main menu

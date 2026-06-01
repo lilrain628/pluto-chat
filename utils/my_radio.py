@@ -1,10 +1,16 @@
+import threading
+
 import adi
 
 
 class MyRadio(adi.Pluto):
 
-    def __init__(self, uri: str, user_name: str, tx_length: int = int(2**18),ongoing_transmission = False):
-        super().__init__(f'ip:{uri}')
+    def __init__(self, uri: str, user_name: str, tx_length: int = int(2**18), ongoing_transmission=False):
+        uri = uri.strip()
+        if not uri.startswith(('ip:', 'usb:')):
+            uri = f'ip:{uri}'
+        super().__init__(uri)
+        self._io_lock = threading.RLock()
         self._user_name = user_name
         self._tx_length = tx_length
         self._ongoing_transmission = ongoing_transmission
@@ -55,21 +61,34 @@ loopback:                {self.loopback:<12} 0=Disabled, 1=Digital, 2=RF
     def ongoing_transmission(self,value):
         self._ongoing_transmission = value
 
+    @property
+    def io_lock(self):
+        return self._io_lock
+
     def transmit_samples(self, samples):
-        if self.tx_cyclic_buffer and self._ongoing_transmission:
-            self.kill_tranmission()
-        self.tx_cyclic_buffer = True
-        tx_samples = (samples) * (2**14)
-        self.tx(tx_samples)
-        self._ongoing_transmission = True
+        with self._io_lock:
+            self.rx_destroy_buffer()
+            self.tx_destroy_buffer()
+            self.tx_cyclic_buffer = True
+            tx_samples = (samples) * (2**14)
+            try:
+                self.tx(tx_samples)
+            except Exception:
+                self.tx_destroy_buffer()
+                self._ongoing_transmission = False
+                raise
+            self._ongoing_transmission = True
 
     def kill_tranmission(self):
-        self.tx_destroy_buffer()
-        self._ongoing_transmission = False
+        self.kill_transmission()
+
+    def kill_transmission(self):
+        with self._io_lock:
+            self.tx_destroy_buffer()
+            self._ongoing_transmission = False
 
     def receive_samples(self):
-        for i in range(5):
-            samples = self.rx()
-        return samples / (2**11)
-
-
+        with self._io_lock:
+            for i in range(5):
+                samples = self.rx()
+            return samples / (2**11)

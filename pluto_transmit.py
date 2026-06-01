@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from  transmission_module.signal_generator_TX import signal_generator
 from  transmission_module.frame_generator_TX import frame_generator_TX
 from utils.visualization import plot_spectrum
+from utils.caesar_cipher import caesar_encrypt
 
 
 # PLUTO SDR Setup
@@ -27,15 +28,17 @@ msg1 = "This is the end Hold your breath and count to ten Feel the Earth move an
 msg4 = "Gründlich durchgecheckt steht sie da Und wartet auf den Start, alles klar! Experten streiten sich Um ein paar Daten Die Crew hat da noch Ein paar Fragen doch Der Countdown läuft Effektivität bestimmt das Handeln Man verlässt sich blind Auf den ander'n Jeder weiß genau Was von ihm abhängt Jeder ist im Stress Doch Major Tom Macht einen Scherzaaaa"
 msg5 = "Hello World!"
 msg6 = "I'd sit alone and watch your light My only friend through teenage nights And everything I had to know I heard it on my radio So don't become some background noise A backdrop for the girls and boys Who just don't know, or just don't care And just complain when you're not there You had your time, you had the power You've yet to have your finest hour Radio (radio) All we hear is radio ga ga Radio goo goo Radio ga ga Radio, what's new? Radio, someone still loves you"
-msg7 = "Hello from user1"
+msg7 = "Hello from user PC"
 data_length = 80
-msg = msg6
+msg = msg7
+encrypted_msg = caesar_encrypt(msg)
 print(f'Message Character Length = {len(msg)}')
+print(f'Encrypted Message = {encrypted_msg}')
 
 ### FRAME GENERATION
 my_frames, single_frame_length, my_header, data_length_with_id = frame_generator_TX(
     data_length=data_length,
-    text_message=msg,
+    text_message=encrypted_msg,
     header_type='barker13',
     modulation_type='QAM4_2',
     info=False)

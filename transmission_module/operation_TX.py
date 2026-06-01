@@ -1,6 +1,7 @@
 from transmission_module.signal_generator_TX import signal_generator
 from transmission_module.frame_generator_TX import frame_generator_TX
 from utils.my_radio import MyRadio
+from utils.caesar_cipher import caesar_encrypt
 
 
 
@@ -11,9 +12,10 @@ def operation_TX(my_SDR: MyRadio, msg: str, plotGraphs: bool, info: bool):
     HALF_NO_OF_SYMBOLS = 6
     ROLLOFF_FACTOR = 0.75
     DATA_LENGTH = 80
+    encrypted_msg = caesar_encrypt(msg)
     my_frames, single_frame_length, my_header, data_len_with_id = frame_generator_TX(
         data_length=DATA_LENGTH,
-        text_message=msg,
+        text_message=encrypted_msg,
         header_type='barker13',
         modulation_type='QAM4_2',
         info=False)
@@ -32,6 +34,7 @@ def operation_TX(my_SDR: MyRadio, msg: str, plotGraphs: bool, info: bool):
         print(f'Appended Symbol Frames Length = {len(my_frames)}')
         print(f'Symbol Frames = {my_frames[:50]}')
         print(f'Message Character Length = {len(msg)}')
+        print(f'Encrypted Message = {encrypted_msg}')
         print(my_signal[:-100])
         print(len(my_signal))
         

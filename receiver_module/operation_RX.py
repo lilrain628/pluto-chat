@@ -12,6 +12,7 @@ from utils.maximum_frequency import maximum_frequency
 from adaptive_algorithms.costas_loop import costas_loop_QAM
 from adaptive_algorithms.clock_recovery import clock_recovery_OP_max
 from utils.my_radio import MyRadio
+from utils.caesar_cipher import caesar_decrypt
 """
     Perform signal processing operations on received samples and extract messages.
 
@@ -35,8 +36,9 @@ def operation_RX(my_SDR: MyRadio, plot_graphs: bool):
     OVERSAMPLING_RATE = 16
     HALF_NO_OF_SYMBOLS = 6
     ROLLOFF_FACTOR = 0.75
-    Ts = 1 / my_SDR.sample_rate
-    sampling_rate = my_SDR.sample_rate
+    with my_SDR.io_lock:
+        Ts = 1 / my_SDR.sample_rate
+        sampling_rate = my_SDR.sample_rate
     pulse = srrc(syms=HALF_NO_OF_SYMBOLS,
                  beta=ROLLOFF_FACTOR,
                  P=OVERSAMPLING_RATE)
@@ -125,6 +127,6 @@ def operation_RX(my_SDR: MyRadio, plot_graphs: bool):
             modulation_type='QAM4_2')
         message_output = message_handler(received_message,
                                          display_outputs=False)
-        return message_output
+        return caesar_decrypt(message_output)
     except:
         pass
