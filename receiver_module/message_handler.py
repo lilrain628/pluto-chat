@@ -1,3 +1,5 @@
+import re
+
 from numpy import array, append, zeros, hstack, flipud, isin, max, any
 from math import ceil
 """
@@ -12,25 +14,46 @@ from math import ceil
     """
 
 FRAME_FILLER = "00ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890"
+FRAME_DATA_LENGTH = 80
+FRAME_ID_PATTERN = re.compile(r"0X([0-9A-F]{2})")
+
+
+def _extract_frame_array(received_message):
+    frame_array = array([], dtype=str)
+    cursor = 0
+    text = str(received_message)
+
+    while True:
+        prefix_match = FRAME_ID_PATTERN.search(text, cursor)
+        if prefix_match is None:
+            break
+
+        frame_id = prefix_match.group(1)
+        payload_start = prefix_match.end()
+        payload_limit = payload_start + FRAME_DATA_LENGTH
+        suffix = f"0X{frame_id}"
+        suffix_start = text.find(
+            suffix, payload_start, payload_limit + len(suffix))
+
+        if suffix_start == -1:
+            cursor = prefix_match.start() + 1
+            continue
+
+        payload = text[payload_start:suffix_start]
+        if payload and not (payload in FRAME_FILLER):
+            frame_array = append(frame_array, frame_id + payload)
+
+        cursor = suffix_start + len(suffix)
+
+    return frame_array
 
 
 def message_handler(received_message, display_outputs: bool):
 
-    split_array = received_message.split('0X')
     id_array = array([], dtype=int)
-    frame_array = array([], dtype=str)
+    frame_array = _extract_frame_array(received_message)
     id_and_substrings = array([], dtype=tuple)
     equal_flag = False
-
-    for idx in range(len(split_array)):
-        if (idx <= len(split_array) - 2) and (split_array[idx] != ''):
-            if (split_array[idx][:2] == split_array[idx + 1][:2]) and (
-                    not (split_array[idx] in FRAME_FILLER)):
-                substring = split_array[idx]
-                frame_array = append(frame_array, substring)
-            else:
-                pass
-                
 
     for idx in range(len(frame_array)):
         if idx != len(frame_array) - 1:
@@ -87,6 +110,11 @@ def message_handler(received_message, display_outputs: bool):
                     id_and_substrings = append(
                         id_and_substrings, tuple([current_id, trimmed_string]))
 
+    if len(id_array) == 0:
+        if display_outputs:
+            print(f'frameArray:\n {frame_array}')
+        return ""
+
     max_id = max(id_array)
     id_and_substrings_len = len(id_and_substrings)
     storage_matrix_columns = max_id + 1
@@ -122,7 +150,6 @@ def message_handler(received_message, display_outputs: bool):
             final_message[message_part_counter] = str(message_partition)
             message_part_counter += 1
     if display_outputs:
-        print(f'splitArray:\n {split_array}')
         print(f'frameArray:\n {frame_array}')
         print(f'idAndText Array: \n {id_and_substrings}')
         print(f'msgStorage Array: \n {message_storage_matrix}')
