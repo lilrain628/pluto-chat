@@ -4,6 +4,7 @@ from  transmission_module.signal_generator_TX import signal_generator
 from  transmission_module.frame_generator_TX import frame_generator_TX
 from utils.visualization import plot_spectrum
 from utils.caesar_cipher import caesar_encrypt
+from utils.message_protocol import add_message_prefix
 
 
 # PLUTO SDR Setup
@@ -16,7 +17,7 @@ sdr.tx_lo = loFreq
 sdr.tx_rf_bandwidth = bandwidth
 sdr.sample_rate = sampleRate
 sdr.tx_hardwaregain_chan0 = txGain
-sdr.tx_cyclic_buffer = True
+sdr.tx_cyclic_buffer = False
 Ts = 1 / sampleRate
 tx_len = int(2**18)
 
@@ -31,7 +32,7 @@ msg6 = "I'd sit alone and watch your light My only friend through teenage nights
 msg7 = "Hello from user PC"
 data_length = 80
 msg = msg7
-encrypted_msg = caesar_encrypt(msg)
+encrypted_msg = caesar_encrypt(add_message_prefix(msg))
 print(f'Message Character Length = {len(msg)}')
 print(f'Encrypted Message = {encrypted_msg}')
 

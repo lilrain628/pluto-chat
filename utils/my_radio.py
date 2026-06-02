@@ -65,11 +65,11 @@ loopback:                {self.loopback:<12} 0=Disabled, 1=Digital, 2=RF
     def io_lock(self):
         return self._io_lock
 
-    def transmit_samples(self, samples):
+    def transmit_samples(self, samples, cyclic: bool = False):
         with self._io_lock:
             self.rx_destroy_buffer()
             self.tx_destroy_buffer()
-            self.tx_cyclic_buffer = True
+            self.tx_cyclic_buffer = cyclic
             tx_samples = (samples) * (2**14)
             try:
                 self.tx(tx_samples)
@@ -77,7 +77,7 @@ loopback:                {self.loopback:<12} 0=Disabled, 1=Digital, 2=RF
                 self.tx_destroy_buffer()
                 self._ongoing_transmission = False
                 raise
-            self._ongoing_transmission = True
+            self._ongoing_transmission = cyclic
 
     def kill_tranmission(self):
         self.kill_transmission()
