@@ -16,7 +16,7 @@ sdr.tx_lo = loFreq
 sdr.tx_rf_bandwidth = bandwidth
 sdr.sample_rate = sampleRate
 sdr.tx_hardwaregain_chan0 = txGain
-sdr.tx_cyclic_buffer = False
+sdr.tx_cyclic_buffer = True
 Ts = 1 / sampleRate
 tx_len = int(2**18)
 

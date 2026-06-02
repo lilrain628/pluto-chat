@@ -39,7 +39,6 @@ def input_and_transmit(input_queue, exit_event, mySDR):
 
 # Function to print a message every second
 def print_message(exit_event, mySDR):
-    last_received_message = None
     while not exit_event.is_set():
         try:
             receivedMessage = operation_RX(mySDR, False)
@@ -47,9 +46,10 @@ def print_message(exit_event, mySDR):
             print(f"SDR receive error: {error}")
             exit_event.set()
             break
-        if receivedMessage is not None and receivedMessage != last_received_message:
+        if receivedMessage == None:
+            pass
+        else:
             print(f'user: {receivedMessage}')
-            last_received_message = receivedMessage
         time.sleep(1)
 
 

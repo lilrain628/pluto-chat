@@ -39,4 +39,4 @@ def operation_TX(my_SDR: MyRadio, msg: str, plotGraphs: bool, info: bool):
         print(len(my_signal))
         
 
-    my_SDR.transmit_samples(my_signal, cyclic=False)
+    my_SDR.transmit_samples(my_signal)
