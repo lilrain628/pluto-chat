@@ -16,6 +16,8 @@ tx_gain = 0
 rx_gain_type = 'slow_attack'
 tx_sample_size = int(2**18)
 rx_sample_size = int(2**16)
+encryption_protocol = 'caesar'
+encryption_key = ''
 
 
 # Function to message transmission
@@ -37,8 +39,10 @@ def input_and_transmit(input_queue, exit_event, mySDR):
                 break
             msg = user_input
             transmit_message(msg, mySDR)
-        except ValueError:
-            print("Invalid input. Please enter a valid number.")
+        except ValueError as error:
+            print(f"Transmit error: {error}")
+        except RuntimeError as error:
+            print(f"Transmit error: {error}")
         except queue.Empty:  # Use the queue module for the exception
             pass
 
@@ -69,6 +73,8 @@ def add_radio_menu():
     mySDR.gain_control_mode_chan0 = rx_gain_type
     mySDR.rx_buffer_size = rx_sample_size
     mySDR._tx_length = tx_sample_size
+    mySDR.encryption_protocol = encryption_protocol
+    mySDR.encryption_key = encryption_key
 
     return mySDR
 

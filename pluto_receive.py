@@ -12,7 +12,7 @@ from receiver_module.message_handler import message_handler
 from utils.maximum_frequency import maximum_frequency
 from adaptive_algorithms.costas_loop import costas_loop_QAM
 from adaptive_algorithms.clock_recovery import clock_recovery_OP_max
-from utils.caesar_cipher import caesar_decrypt
+from utils.encryption import decrypt_message
 
 # System Parameters
 tx_LO_frequency = int(900e6)
@@ -23,6 +23,8 @@ bandwidth = int(10e6)
 sampling_rate = int(10e6)
 number_of_samples = 2**16
 Ts = 1 / sampling_rate
+encryption_protocol = 'caesar'
+encryption_key = ''
 # SDR Parameters
 
 sdr = adi.Pluto("ip:192.168.3.1")
@@ -127,7 +129,8 @@ received_message = frame_generator_RX(quantized_symbols=quantized_symbols,
 print(f'Received Message is:\n{received_message}')
 try:
     encrypted_msg_output = message_handler(received_message, True)
-    msg_output = caesar_decrypt(encrypted_msg_output)
+    msg_output = decrypt_message(encrypted_msg_output, encryption_protocol,
+                                 encryption_key)
     print(f'Encrypted Message Output: \n {encrypted_msg_output}')
     print(f'Decrypted Message Output: \n {msg_output}')
 except:

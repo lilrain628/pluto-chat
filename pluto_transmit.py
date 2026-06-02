@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from  transmission_module.signal_generator_TX import signal_generator
 from  transmission_module.frame_generator_TX import frame_generator_TX
 from utils.visualization import plot_spectrum
-from utils.caesar_cipher import caesar_encrypt
+from utils.encryption import encrypt_message
 
 
 # PLUTO SDR Setup
@@ -30,8 +30,10 @@ msg5 = "Hello World!"
 msg6 = "I'd sit alone and watch your light My only friend through teenage nights And everything I had to know I heard it on my radio So don't become some background noise A backdrop for the girls and boys Who just don't know, or just don't care And just complain when you're not there You had your time, you had the power You've yet to have your finest hour Radio (radio) All we hear is radio ga ga Radio goo goo Radio ga ga Radio, what's new? Radio, someone still loves you"
 msg7 = "Hello from user PC"
 data_length = 80
+encryption_protocol = 'caesar'
+encryption_key = ''
 msg = msg7
-encrypted_msg = caesar_encrypt(msg)
+encrypted_msg = encrypt_message(msg, encryption_protocol, encryption_key)
 print(f'Message Character Length = {len(msg)}')
 print(f'Encrypted Message = {encrypted_msg}')
 
@@ -65,7 +67,7 @@ plot_spectrum(my_signal,Ts)
 my_signal = my_signal * 2**14
 
 print(
-    f'LO Freq = {loFreq}\nSample Rate = {sampleRate}\nGain = {txGain}\nPlutoSDR Tx Buffer Sample Size = {tx_len}\nNof SPS = {N}\nNof Sidelobes ={syms} \nbeta = {beta}\nData Length = {data_length}\nOne Frame Length ={single_frame_length}\nDataLenWithId = {data_length_with_id}\nHeader ={my_header}'
+    f'LO Freq = {loFreq}\nSample Rate = {sampleRate}\nGain = {txGain}\nPlutoSDR Tx Buffer Sample Size = {tx_len}\nNof SPS = {N}\nNof Sidelobes ={syms} \nbeta = {beta}\nData Length = {data_length}\nEncryption = {encryption_protocol}\nOne Frame Length ={single_frame_length}\nDataLenWithId = {data_length_with_id}\nHeader ={my_header}'
 )
 sdr.tx(my_signal)
 

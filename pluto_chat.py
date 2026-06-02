@@ -27,8 +27,10 @@ def input_and_transmit(input_queue, exit_event, mySDR):
                 break
             msg = user_input
             transmit_message(msg, mySDR)
-        except ValueError:
-            print("Invalid input. Please enter a valid number.")
+        except ValueError as error:
+            print(f"Transmit error: {error}")
+        except RuntimeError as error:
+            print(f"Transmit error: {error}")
         except OSError as error:
             print(f"SDR transmit error: {error}")
             exit_event.set()
@@ -81,7 +83,9 @@ def change_radio_menu(mySDR):
         print("7 - Tx Sample Size 2**N (Enter N)")
         print("8 - Rx Sample Size 2**N (Enter N)")
         print("9 - User Name")
-        print("10 - Back")
+        print("10 - Encryption Protocol")
+        print("11 - AES-128 Password")
+        print("12 - Back")
 
         parameter_selection = int(input("Select a parameter to change: "))
 
@@ -124,6 +128,25 @@ def change_radio_menu(mySDR):
             value = input("Enter the User Name: ")
             mySDR._user_name = value
         elif parameter_selection == 10:
+            print("1 - Caesar")
+            print("2 - AES-128")
+            value = input("Select encryption protocol: ")
+            try:
+                mySDR.encryption_protocol = value
+            except ValueError as error:
+                print(error)
+                continue
+            if mySDR.encryption_protocol == "aes128" and not mySDR.encryption_key:
+                value = input("Enter AES-128 password: ")
+                if value == "":
+                    print("AES-128 password is empty. Protocol changed back to Caesar.")
+                    mySDR.encryption_protocol = "caesar"
+                else:
+                    mySDR.encryption_key = value
+        elif parameter_selection == 11:
+            value = input("Enter AES-128 password: ")
+            mySDR.encryption_key = value
+        elif parameter_selection == 12:
             break
 
 

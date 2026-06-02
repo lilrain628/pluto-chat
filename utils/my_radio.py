@@ -1,6 +1,8 @@
 import threading
 
 import adi
+from utils.encryption import (DEFAULT_ENCRYPTION_PROTOCOL,
+                              normalize_encryption_protocol)
 
 
 class MyRadio(adi.Pluto):
@@ -14,6 +16,8 @@ class MyRadio(adi.Pluto):
         self._user_name = user_name
         self._tx_length = tx_length
         self._ongoing_transmission = ongoing_transmission
+        self._encryption_protocol = DEFAULT_ENCRYPTION_PROTOCOL
+        self._encryption_key = ""
 
     def __repr__(self):
         retstr = f"""Pluto(uri="{self.uri}") object for user "{self._user_name}" with following key properties:
@@ -33,6 +37,8 @@ tx_length                {self._tx_length} Samples for transmission
 filter:                  {str(self.filter):<12} FIR filter file
 sample_rate:             {self.sample_rate / 1000000:<12} MSPS, Sample rate RX and TX paths
 loopback:                {self.loopback:<12} 0=Disabled, 1=Digital, 2=RF
+encryption_protocol:     {self._encryption_protocol:<12} Message encryption protocol
+aes_key_configured:      {bool(self._encryption_key):<12} AES password is set
 
 """
         return retstr
@@ -60,6 +66,22 @@ loopback:                {self.loopback:<12} 0=Disabled, 1=Digital, 2=RF
     @ongoing_transmission.setter
     def ongoing_transmission(self,value):
         self._ongoing_transmission = value
+
+    @property
+    def encryption_protocol(self):
+        return self._encryption_protocol
+
+    @encryption_protocol.setter
+    def encryption_protocol(self, value):
+        self._encryption_protocol = normalize_encryption_protocol(value)
+
+    @property
+    def encryption_key(self):
+        return self._encryption_key
+
+    @encryption_key.setter
+    def encryption_key(self, value):
+        self._encryption_key = "" if value is None else str(value)
 
     @property
     def io_lock(self):
