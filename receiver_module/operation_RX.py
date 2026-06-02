@@ -13,7 +13,6 @@ from adaptive_algorithms.costas_loop import costas_loop_QAM
 from adaptive_algorithms.clock_recovery import clock_recovery_OP_max
 from utils.my_radio import MyRadio
 from utils.caesar_cipher import caesar_decrypt
-from utils.message_protocol import remove_message_prefix
 """
     Perform signal processing operations on received samples and extract messages.
 
@@ -128,7 +127,6 @@ def operation_RX(my_SDR: MyRadio, plot_graphs: bool):
             modulation_type='QAM4_2')
         message_output = message_handler(received_message,
                                          display_outputs=False)
-        decrypted_message = caesar_decrypt(message_output)
-        return remove_message_prefix(decrypted_message)
+        return caesar_decrypt(message_output)
     except:
         pass
